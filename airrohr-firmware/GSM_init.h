@@ -41,17 +41,11 @@ bool GSM_init(SoftwareSerial *gsm_serial)
     Serial.print("GSM module found!");
 
     // Check if SIM is inserted
-    char SIM_CCID[21];
-    int SIM_CCID_LEN = fona.getSIMCCID(SIM_CCID);
-    Serial.print("SIM CCID: ");
-    Serial.println(SIM_CCID);
-
-    if (SIM_CCID_LEN < 1)
+    if (!is_SIMCID_valid())
     {
-        error_msg = "SIM CARD NOT FOUND";
+        error_msg = "Could not get SIM CID";
         GSM_INIT_ERROR = error_msg;
         Serial.println(error_msg);
-        SIM_AVAILABLE = false;
         return false;
     }
 
@@ -188,5 +182,26 @@ void SIM_PIN_Setup()
     else
     {
         return;
+    }
+}
+
+bool is_SIMCID_valid()
+{
+    char res[21];
+    fona.getSIMCCID(res);
+    String ccid = String(res);
+    if (ccid.indexOf("ERROR") > -1) // Means string has the word error
+    {
+        SIM_AVAILABLE = false;
+        return false;
+    }
+
+    else
+    {
+        strcpy(SIM_CID, res);
+        SIM_AVAILABLE = true;
+        Serial.print("SIM CCID: ");
+        Serial.println(SIM_CID);
+        return true;
     }
 }
