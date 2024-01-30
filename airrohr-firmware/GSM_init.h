@@ -18,6 +18,7 @@ bool GSM_CONNECTED = false;
 bool SIM_AVAILABLE = false;
 bool GPRS_CONNECTED = false;
 bool SIM_PIN_SET = false;
+char SIM_CID[21] = "";
 String NETWORK_NAME = "";
 
 // Set a decent delay before this to warm up the GSM module
@@ -53,12 +54,6 @@ bool GSM_init(SoftwareSerial *gsm_serial)
     Serial.println("SIM card available");
     Serial.println("Setting up SIM..");
 
-    // if (!fona.unlockSIM(SIM_PIN))
-    // {
-    //     Serial.print("Unable to unlock pin");
-    //     SIM_AVAILABLE = false;
-    //     return false;
-    // }
     SIM_PIN_Setup();
 
     if (!SIM_PIN_SET)
@@ -67,14 +62,16 @@ bool GSM_init(SoftwareSerial *gsm_serial)
         return false;
     }
 
-    // Register to network //ToDo: Have multipe attempts
-    if (!fona.getNetworkStatus())
+    // Register to network
+    bool registered_to_network = false;
+    int retry_count = 0;
+    while (!registered_to_network && retry_count < 10)
     {
-        Serial.println("Could not get network status");
-        return false;
-    }
-    else
-    { // print network name
+        if (fona.getNetworkStatus() == 1)
+            registered_to_network = true;
+
+        retry_count++;
+        delay(3000);
     }
 
     // Set GPRS APN details
@@ -122,7 +119,7 @@ static void unlock_pin(char *PIN)
     }
 }
 
-String handle_AT_CMD(String cmd, int timeout = 100)
+String handle_AT_CMD(String cmd, int _delay = 1000)
 {
     while (Serial.available() > 0)
     {
@@ -130,17 +127,17 @@ String handle_AT_CMD(String cmd, int timeout = 100)
     }
     String RESPONSE = "";
     fona.println(cmd);
-    delay(timeout); // Avoid putting any code that might delay the receiving all contents from the serial buffer as it is quickly filled up
+    delay(_delay); // Avoid putting any code that might delay the receiving all contents from the serial buffer as it is quickly filled up
 
     while (fona.available() > 0)
     {
         RESPONSE += fona.readString();
     }
-    Serial.println();
-    Serial.println("GSM RESPONSE:");
-    Serial.println("-------");
-    Serial.print(RESPONSE);
-    Serial.println("-----");
+    // Serial.println();
+    // Serial.println("GSM RESPONSE:");
+    // Serial.println("-------");
+    // Serial.print(RESPONSE);
+    // Serial.println("-----");
 
     return RESPONSE;
 }
@@ -148,11 +145,11 @@ String handle_AT_CMD(String cmd, int timeout = 100)
 void SIM_PIN_Setup()
 {
 
-    Serial.print("PIN STATUS: ");
     String res = handle_AT_CMD("AT+CPIN?");
     int start_index = res.indexOf(":");
     res = res.substring(start_index + 1);
     res.trim();
+    Serial.print("PIN STATUS: ");
     Serial.println(res);
     if (res.startsWith("READY"))
     {
