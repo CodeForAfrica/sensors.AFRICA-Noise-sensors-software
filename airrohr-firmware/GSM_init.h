@@ -205,3 +205,17 @@ bool is_SIMCID_valid()
         return true;
     }
 }
+
+// Similar to FONA enableGPRS() but quicker because APN setting are not configured as it is configured during GSM_init()
+bool GPRS_init()
+{
+    // handle_AT_CMD("AT+SAPBR=0,1"); // Disable GPRS
+    handle_AT_CMD("AT+CGATT=1");                // Attach GPRS service
+    String res = handle_AT_CMD("AT+SAPBR=1,1"); // Enable GPRS
+    if (res.indexOf("OK") == -1)
+    {
+        Serial.println("Failed to enable GPRS");
+        return false;
+    }
+    return true;
+}
