@@ -18,6 +18,7 @@ bool GSM_CONNECTED = false;
 bool SIM_AVAILABLE = false;
 bool GPRS_CONNECTED = false;
 bool SIM_PIN_SET = false;
+bool SIM_USABLE = false;
 char SIM_CID[21] = "";
 String GSM_INIT_ERROR = "";
 String NETWORK_NAME = "";
@@ -63,6 +64,8 @@ bool GSM_init(SoftwareSerial *gsm_serial)
 
         return false;
     }
+    // Set if SIM is usable flag
+    SIM_USABLE = true;
 
     // Register to network
     bool registered_to_network = false;
