@@ -19,6 +19,7 @@ bool SIM_AVAILABLE = false;
 bool GPRS_CONNECTED = false;
 bool SIM_PIN_SET = false;
 char SIM_CID[21] = "";
+String GSM_INIT_ERROR = "";
 String NETWORK_NAME = "";
 
 // Set a decent delay before this to warm up the GSM module
@@ -26,11 +27,13 @@ String NETWORK_NAME = "";
 bool GSM_init(SoftwareSerial *gsm_serial)
 { // Pass a ptr to SoftwareSerial GSM instance
     gsm_serial->begin(4800);
-
+    String error_msg = "";
     // Check if there is serial communication with a GSM module
     if (!fona.begin(*gsm_serial))
     {
-        Serial.println("Could not find GSM module");
+        error_msg = "Could not find GSM module";
+        GSM_INIT_ERROR = error_msg;
+        Serial.println(error_msg);
         GSM_CONNECTED = false;
         return false;
     }
@@ -45,7 +48,9 @@ bool GSM_init(SoftwareSerial *gsm_serial)
 
     if (SIM_CCID_LEN < 1)
     {
-        Serial.println("SIM CARD NOT FOUND");
+        error_msg = "SIM CARD NOT FOUND";
+        GSM_INIT_ERROR = error_msg;
+        Serial.println(error_msg);
         SIM_AVAILABLE = false;
         return false;
     }
@@ -58,7 +63,10 @@ bool GSM_init(SoftwareSerial *gsm_serial)
 
     if (!SIM_PIN_SET)
     {
-        Serial.println("Unable to set SIM PIN");
+        error_msg = "Unable to set SIM PIN";
+        GSM_INIT_ERROR = error_msg;
+        Serial.println(error_msg);
+
         return false;
     }
 
@@ -74,6 +82,14 @@ bool GSM_init(SoftwareSerial *gsm_serial)
         delay(3000);
     }
 
+    if (!registered_to_network)
+    {
+        error_msg = "Could not register to network";
+        GSM_INIT_ERROR = error_msg;
+        Serial.println(error_msg);
+        return false;
+    }
+
     // Set GPRS APN details
     fona.setGPRSNetworkSettings(F(GSM_APN), F(APN_USER), F(APN_PWD));
 
@@ -83,7 +99,9 @@ bool GSM_init(SoftwareSerial *gsm_serial)
 
     if (!fona.enableGPRS(true)) // ToDO: Have multiple attempts
     {
-        Serial.println("Failed to enable GPRS");
+        error_msg = "Failed to enable GPRS";
+        GSM_INIT_ERROR = error_msg;
+        Serial.println(error_msg);
         return false;
     }
 
