@@ -3618,7 +3618,7 @@ void setup(void)
 	init_display();
 	init_lcd();
 	setupNetworkTime();
-	connectWifi(); // ?: Why are we connecting to here: Test whether it is necessary here
+
 	setup_webserver();
 	debug_outln_info(F("\nChipId: "), esp_chipid);
 
@@ -3631,6 +3631,7 @@ void setup(void)
 			Serial.println("GSM not fully configured");
 			Serial.print("Failure point: ");
 			Serial.println(GSM_INIT_ERROR);
+			Serial.println();
 		} // connectGSM();
 	}
 	if (!GPRS_CONNECTED)
