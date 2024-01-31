@@ -1,20 +1,12 @@
 #include <SoftwareSerial.h>
 #include <Adafruit_FONA.h>
-// Change this appropriate GSM pins
-#define FONA_TX 0
-#define FONA_RX 2
-#define FONA_RST 4
-
-// ToDo: Use external configuration
-char SIM_PIN[5] = "";
-#define GSM_APN ""
-#define APN_USER ""
-#define APN_PWD ""
+#include "ext_def.h"
 
 SoftwareSerial fonaSS(FONA_TX, FONA_RX);
 SoftwareSerial *fonaSerial = &fonaSS;
 Adafruit_FONA fona = Adafruit_FONA(FONA_RST);
 
+char SIM_PIN[5] = GSM_PIN;
 bool GSM_CONNECTED = false;
 bool SIM_AVAILABLE = false;
 bool GPRS_CONNECTED = false;
@@ -108,7 +100,7 @@ bool GSM_init(SoftwareSerial *gsm_serial)
     }
 
     // Set GPRS APN details
-    fona.setGPRSNetworkSettings(F(GSM_APN), F(APN_USER), F(APN_PWD));
+    fona.setGPRSNetworkSettings(F(GPRS_APN), F(GPRS_USERNAME), F(GPRS_PASSWORD));
 
     // Attempt to enable GPRS
     Serial.println("Attempting to enable GPRS");

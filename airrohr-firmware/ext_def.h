@@ -1,3 +1,5 @@
+#ifndef EXT_DEF_H
+#define EXT_DEF_H
 // Language config
 #define CURRENT_LANG INTL_LANG
 
@@ -33,7 +35,8 @@ const char WWW_PASSWORD[] PROGMEM = "feinstaub";
 // OpenSenseMap
 #define SENSEBOXID ""
 
-enum LoggerEntry {
+enum LoggerEntry
+{
     LoggerCFA,
     LoggerSensorCommunity,
     LoggerMadavi,
@@ -45,13 +48,14 @@ enum LoggerEntry {
     LoggerCount
 };
 
-struct LoggerConfig {
+struct LoggerConfig
+{
     uint16_t destport;
     uint16_t _unused;
 #if defined(ESP8266)
-    BearSSL::Session* session;
+    BearSSL::Session *session;
 #else
-    void* session;
+    void *session;
 #endif
 };
 
@@ -121,12 +125,11 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = " ";
 #define FONA_TX D2
 #define FONA_RST D3
 
-//define I2S pins for the SPH0645 MIC
-#define I2SI_DATA         12    // I2S data on GPIO12
-#define I2SI_BCK          13    // I2S clk on GPIO13
-#define I2SI_WS           14    // I2S select on GPIO14
+// define I2S pins for the SPH0645 MIC
+#define I2SI_DATA 12 // I2S data on GPIO12
+#define I2SI_BCK 13  // I2S clk on GPIO13
+#define I2SI_WS 14   // I2S select on GPIO14
 #endif
-
 
 // pin assignments for Arduino SAMD Zero board
 #if defined(ARDUINO_SAMD_ZERO)
@@ -142,10 +145,9 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = " ";
 #if defined(ARDUINO_LOLIN_D32_PRO)
 #define ONEWIRE_PIN D32
 #endif
-//#define RFM69_CS D0
-//#define RFM69_RST D2
-//#define RFM69_INT D4
-
+// #define RFM69_CS D0
+// #define RFM69_RST D2
+// #define RFM69_INT D4
 
 // pin assignments for heltec_wifi_lora_32_V2 board
 #if defined(WIFI_LoRa_32_V2)
@@ -168,8 +170,8 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = " ";
 // Device is WiFi Enabled
 #define WIFI_ENABLED 0
 
-//SPH0645 MEMS Microphone
-#define SPHO645_READ  1
+// SPH0645 MEMS Microphone
+#define SPHO645_READ 1
 #define SPH0645_API_PIN 15
 
 // GSM
@@ -219,3 +221,5 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = " ";
 
 // Set debug level for serial output?
 #define DEBUG 3
+
+#endif
