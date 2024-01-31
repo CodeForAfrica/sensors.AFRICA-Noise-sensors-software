@@ -314,18 +314,21 @@ float last_value_dnms_la_max = -1.0;
 /* GSM declaration                                               *
 /*****************************************************************/
 #if defined(ESP8266)
-SoftwareSerial fonaSS(FONA_TX, FONA_RX);
-SoftwareSerial *fonaSerial = &fonaSS;
-Adafruit_FONA fona = Adafruit_FONA(FONA_RST);
+// SoftwareSerial fonaSS(FONA_TX, FONA_RX);
+// SoftwareSerial *fonaSerial = &fonaSS;
+// Adafruit_FONA fona = Adafruit_FONA(FONA_RST);
 
-uint8_t GSM_CONNECTED = 1;
-uint8_t GPRS_CONNECTED = 1;
+// uint8_t GSM_CONNECTED = 1;
+// uint8_t GPRS_CONNECTED = 1;
 
-char gsm_pin[5] = "";
+// char gsm_pin[5] = "";
 
-char gprs_apn[100] = "internet";
-char gprs_username[100] = "";
-char gprs_password[100] = "";
+// char gprs_apn[100] = "internet";
+// char gprs_username[100] = "";
+// char gprs_password[100] = "";
+
+#include "GSM_handler.h"
+
 #endif
 
 /*****************************************************************
@@ -2324,76 +2327,76 @@ static WiFiClient *getNewLoggerWiFiClient(const LoggerEntry logger)
 /*****************************************************************
 /* GSM auto connecting script                                   *
 /*****************************************************************/
-void connectGSM()
-{
+// void connectGSM() // ** Called only once at setup()
+// {
 
-	int retry_count = 0;
+// 	int retry_count = 0;
 
-	fonaSerial->begin(4800);
-	if (!fona.begin(*fonaSerial))
-	{
-		debug_outln(F("Couldn't find FONA"), DEBUG_MIN_INFO);
+// 	fonaSerial->begin(4800);
+// 	if (!fona.begin(*fonaSerial))
+// 	{
+// 		debug_outln(F("Couldn't find FONA"), DEBUG_MIN_INFO);
 
-		debug_outln(F("Switching to Wifi"), DEBUG_MIN_INFO);
-		cfg::gsm_capable = 0;
-		connectWifi();
-	}
-	else
-	{
-		debug_outln(F("FONA is OK"), DEBUG_MIN_INFO);
+// 		debug_outln(F("Switching to Wifi"), DEBUG_MIN_INFO);
+// 		cfg::gsm_capable = 0;
+// 		connectWifi();
+// 	}
+// 	else
+// 	{
+// 		debug_outln(F("FONA is OK"), DEBUG_MIN_INFO);
 
-		unlock_pin();
+// 		unlock_pin();
 
-		char imei[16] = {0}; // MUST use a 16 character buffer for IMEI!
-		uint8_t imeiLen = fona.getIMEI(imei);
-		if (imeiLen > 0)
-		{
-			debug_outln(F("Module IMEI: "), DEBUG_MIN_INFO);
-			debug_out(String(imei), DEBUG_MIN_INFO);
-		}
+// 		char imei[16] = {0}; // MUST use a 16 character buffer for IMEI!
+// 		uint8_t imeiLen = fona.getIMEI(imei);
+// 		if (imeiLen > 0)
+// 		{
+// 			debug_outln(F("Module IMEI: "), DEBUG_MIN_INFO);
+// 			debug_out(String(imei), DEBUG_MIN_INFO);
+// 		}
 
-		fona.setGPRSNetworkSettings(F("internet"), F(""), F(""));
+// 		fona.setGPRSNetworkSettings(F("internet"), F(""), F(""));
 
-		while ((fona.getNetworkStatus() != GSM_CONNECTED) && (retry_count < 40))
-		{
-			Serial.println("Not registered on network");
-			delay(5000);
-			retry_count++;
+// 		while ((fona.getNetworkStatus() != GSM_CONNECTED) && (retry_count < 40))
+// 		{
+// 			Serial.println("Not registered on network");
+// 			delay(5000);
+// 			retry_count++;
 
-			if (retry_count > 30)
-			{
-				delay(5000);
-				restart_GSM();
-			}
+// 			if (retry_count > 30)
+// 			{
+// 				delay(5000);
+// 				restart_GSM();
+// 			}
 
-			flushSerial();
-		}
+// 			flushSerial();
+// 		}
 
-		if (fona.getNetworkStatus() != GSM_CONNECTED)
-		{
-			String fss(cfg::fs_ssid);
-			display_debug(fss.substring(0, 16), fss.substring(16));
+// 		if (fona.getNetworkStatus() != GSM_CONNECTED)
+// 		{
+// 			String fss(cfg::fs_ssid);
+// 			display_debug(fss.substring(0, 16), fss.substring(16));
 
-			wifiConfig();
-			if (fona.getNetworkStatus() != GSM_CONNECTED)
-			{
-				retry_count = 0;
-				while ((fona.getNetworkStatus() != GSM_CONNECTED) && (retry_count < 20))
-				{
-					delay(500);
-					debug_outln(".", DEBUG_MIN_INFO);
-					retry_count++;
-				}
-				debug_outln("", DEBUG_MIN_INFO);
-			}
-		}
-		else
-		{
-			enableGPRS();
-			Serial.println("GPRS ENABLED");
-		}
-	}
-}
+// 			wifiConfig();
+// 			if (fona.getNetworkStatus() != GSM_CONNECTED)
+// 			{
+// 				retry_count = 0;
+// 				while ((fona.getNetworkStatus() != GSM_CONNECTED) && (retry_count < 20))
+// 				{
+// 					delay(500);
+// 					debug_outln(".", DEBUG_MIN_INFO);
+// 					retry_count++;
+// 				}
+// 				debug_outln("", DEBUG_MIN_INFO);
+// 			}
+// 		}
+// 		else
+// 		{
+// 			enableGPRS();
+// 			Serial.println("GPRS ENABLED");
+// 		}
+// 	}
+// }
 
 void enableGPRS()
 {
@@ -2416,6 +2419,12 @@ void disableGPRS()
 	delay(3000);
 }
 
+/***
+ * ? Called 3 times. Review the impelementation of this
+ * Todo: Change implementation to shut down GSM and then call GSM_init();
+ *
+ *
+ ***/
 void restart_GSM()
 {
 
@@ -2428,26 +2437,26 @@ void restart_GSM()
 		// while (1);
 	}
 
-	unlock_pin();
+	unlock_pin(SIM_PIN);
 
 	enableGPRS();
 }
 
-static void unlock_pin()
-{
-	flushSerial();
-	if (strlen(gsm_pin) > 1)
-	{
-		debug_outln(F("\nAttempting to Unlock SIM please wait: "), DEBUG_MIN_INFO);
-		delay(10000);
-		if (!fona.unlockSIM(gsm_pin))
-		{
-			debug_outln(F("Failed to Unlock SIM card with pin: "), DEBUG_MIN_INFO);
-			debug_outln(gsm_pin, DEBUG_MIN_INFO);
-			delay(10000);
-		}
-	}
-}
+// static void unlock_pin()
+// {
+// 	flushSerial();
+// 	if (strlen(gsm_pin) > 1)
+// 	{
+// 		debug_outln(F("\nAttempting to Unlock SIM please wait: "), DEBUG_MIN_INFO);
+// 		delay(10000);
+// 		if (!fona.unlockSIM(gsm_pin))
+// 		{
+// 			debug_outln(F("Failed to Unlock SIM card with pin: "), DEBUG_MIN_INFO);
+// 			debug_outln(gsm_pin, DEBUG_MIN_INFO);
+// 			delay(10000);
+// 		}
+// 	}
+// }
 
 /*****************************************************************
  * send data to rest api                                         *
@@ -3609,16 +3618,24 @@ void setup(void)
 	init_display();
 	init_lcd();
 	setupNetworkTime();
-	connectWifi();
+	connectWifi(); // ?: Why are we connecting to here: Test whether it is necessary here
 	setup_webserver();
 	debug_outln_info(F("\nChipId: "), esp_chipid);
 
 	if (cfg::gsm_capable)
 	{
-		connectGSM();
+
+		Serial.println("Attempting to setup GSM connection");
+		if (!GSM_init(fonaSerial))
+		{
+			Serial.println("GSM not fully configured");
+			Serial.print("Failure point: ");
+			Serial.println(GSM_INIT_ERROR);
+		} // connectGSM();
 	}
-	else
+	if (!GPRS_CONNECTED)
 	{
+
 		connectWifi();
 	}
 

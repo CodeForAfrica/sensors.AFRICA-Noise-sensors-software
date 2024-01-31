@@ -5,6 +5,7 @@
 #define FONA_RX 2
 #define FONA_RST 4
 
+// ToDo: Use external configuration
 char SIM_PIN[5] = "";
 #define GSM_APN ""
 #define APN_USER ""
@@ -23,6 +24,25 @@ char SIM_CID[21] = "";
 String GSM_INIT_ERROR = "";
 String NETWORK_NAME = "";
 
+/***
+ * ! Previous GSM Config
+ * ****/
+// uint8_t GSM_CONNECTED = 1;
+// uint8_t GPRS_CONNECTED = 1;
+
+// char gsm_pin[5] = "";
+
+// char gprs_apn[100] = "internet";
+// char gprs_username[100] = "";
+// char gprs_password[100] = "";
+
+/**** Function Declacrations **/
+bool GSM_init(SoftwareSerial *gsm_serial);
+static void unlock_pin(char *PIN);
+String handle_AT_CMD(String cmd, int _delay = 1000);
+void SIM_PIN_Setup();
+bool is_SIMCID_valid();
+bool GPRS_init();
 // Set a decent delay before this to warm up the GSM module
 
 bool GSM_init(SoftwareSerial *gsm_serial)
@@ -134,7 +154,7 @@ static void unlock_pin(char *PIN)
     }
 }
 
-String handle_AT_CMD(String cmd, int _delay = 1000)
+String handle_AT_CMD(String cmd, int _delay)
 {
     while (Serial.available() > 0)
     {
