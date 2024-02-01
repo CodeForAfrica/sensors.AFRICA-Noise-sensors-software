@@ -238,7 +238,8 @@ bool GPRS_init()
     if (res.indexOf("OK") == -1)
     {
         Serial.println("Failed to enable GPRS");
-        return false;
+        GPRS_CONNECTED = false;
+        return GPRS_CONNECTED;
     }
     GPRS_CONNECTED = true;
     return GPRS_CONNECTED;
