@@ -39,6 +39,11 @@ void GSM_soft_reset();
 void restart_GSM();
 void enableGPRS();
 void flushSerial();
+void SMS_read_all();
+void check_SMS_command(String msg_str);
+void run_USSD(String info);
+int arr_size(String *str);
+String *string_separator(String str, char delimiter);
 
 // Set a decent delay before this to warm up the GSM module
 bool GSM_init(SoftwareSerial *gsm_serial)
@@ -311,4 +316,172 @@ void flushSerial()
 {
     while (fonaSS.available())
         fonaSS.read();
+}
+
+/***
+ * ! SMS functionality still under development
+ *
+ *
+ */
+
+void SMS_read_all()
+{
+
+    // read all SMS
+    int8_t smsnum = fona.getNumSMS();
+    uint16_t smslen;
+    int8_t smsn;
+
+    char sms_msg[255];
+
+    if ((fona.type() == FONA3G_A) || (fona.type() == FONA3G_E))
+    {
+        smsn = 0; // zero indexed
+        smsnum--;
+    }
+    else
+    {
+        smsn = 1; // 1 indexed
+    }
+
+    for (; smsn <= smsnum; smsn++)
+    {
+        Serial.print(F("\n\rReading SMS #"));
+        Serial.println(smsn);
+        if (!fona.readSMS(smsn, sms_msg, 250, &smslen))
+        { // pass in buffer and max len!
+            Serial.println(F("Failed to read SMS!"));
+            break;
+        }
+        // if the length is zero, its a special case where the index number is higher
+        // so increase the max we'll look at!
+        if (smslen == 0)
+        {
+            Serial.println(F("[empty slot]"));
+            smsnum++;
+            continue;
+        }
+
+        Serial.print(F("***** SMS #"));
+        Serial.print(smsn);
+        Serial.print(" (");
+        Serial.print(smslen);
+        Serial.println(F(") bytes *****"));
+        Serial.println(sms_msg);
+        Serial.println(F("*****"));
+
+        // ToDo: Check if message contains a command
+        //  this will change index if cmd prompts expecting another sms(es)
+
+        // String sms(sms_msg);
+        check_SMS_command(sms_msg);
+    }
+}
+
+void check_SMS_command(String msg_str)
+{
+    int index_start = msg_str.indexOf("CMD_TYPE:");
+    int index_end = msg_str.indexOf("CMD_END");
+
+    if (index_start == -1 || index_end == -1)
+    {
+        Serial.println("No command found or Wrong command formart");
+        return;
+    }
+
+    else
+    {
+
+        String start_str = "CMD_TYPE:";
+        msg_str = msg_str.substring(msg_str.indexOf(start_str) + start_str.length(), index_end);
+        Serial.println(msg_str);
+        String CMD_TYPE = msg_str;                               // copy message string
+        CMD_TYPE = CMD_TYPE.substring(0, CMD_TYPE.indexOf("=")); // Extract the string that bears the command just before the first '='
+        // Serial.println(CMD_TYPE);
+
+        if (CMD_TYPE = "USSD")
+        {
+            // run USSD code
+            Serial.println("Attempt to run USSD code");
+            run_USSD(msg_str);
+            return;
+        }
+
+        else
+        {
+            Serial.print("Command ");
+            Serial.print(CMD_TYPE);
+            Serial.println(" not found or supported");
+            return;
+        }
+    }
+}
+
+void run_USSD(String info)
+{
+    Serial.print("Received info: ");
+    Serial.println(info);
+
+    String *SEPARATED_CMD = string_separator(info, ';');
+    Serial.print("Size of SEPARATED CMD: ");
+    Serial.println(sizeof(SEPARATED_CMD));
+
+    for (byte i = 0; i < arr_size(SEPARATED_CMD); i++)
+    {
+        Serial.println(SEPARATED_CMD[i]);
+    }
+
+    String USSD = SEPARATED_CMD[0].substring(SEPARATED_CMD[0].indexOf("=") + 1);
+    String target = SEPARATED_CMD[1].substring(SEPARATED_CMD[1].indexOf("=") + 1);
+    String pattern = SEPARATED_CMD[2].substring(SEPARATED_CMD[2].indexOf("=") + 1);
+
+    delete[] SEPARATED_CMD;
+    Serial.println("Extrated info from USSD message");
+    Serial.println(USSD);
+    Serial.println(target);
+    Serial.println(pattern);
+
+    String *USSD_seq = string_separator(USSD, ',');
+
+    for (int i = 0; i <= arr_size(USSD_seq); i++)
+    {
+        // handle AT commands here
+        Serial.println(USSD_seq[i]);
+    }
+
+    delete[] USSD_seq;
+
+    // TODO: Check message with matching pattern and send to target number
+}
+
+int arr_size(String *str)
+{
+    int count = 0;
+    while (str[count] != "\0")
+    {
+        count++;
+    }
+
+    return count;
+}
+
+String *string_separator(String str, char delimiter)
+{ // note: pass delimiter using single quotes
+    int arr_size = 12;
+    String *separated_str = new String[arr_size];
+    int arr_index = 0;
+
+    while (str.indexOf(delimiter) != -1)
+    {
+        int delimiter_index = str.indexOf(delimiter);
+        String extracted_code = str;
+        extracted_code = extracted_code.substring(0, delimiter_index);
+        str = str.substring(delimiter_index + 1);
+
+        separated_str[arr_index] = extracted_code;
+        arr_index++;
+    }
+
+    // separated_str[arr_index] = '\0';  // Does not seem to have an effect
+    return separated_str;
 }
