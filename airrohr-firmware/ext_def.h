@@ -121,9 +121,9 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = " ";
 #define I2C_PIN_SDA D2
 
 // define pins for GSM modules
-#define FONA_RX D1
-#define FONA_TX D2
-#define FONA_RST D3
+#define FONA_RX 2
+#define FONA_TX 0
+#define FONA_RST 4
 
 // define I2S pins for the SPH0645 MIC
 #define I2SI_DATA 12 // I2S data on GPIO12
@@ -179,7 +179,7 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = " ";
 #define GPRS_APN ""
 #define GPRS_USERNAME ""
 #define GPRS_PASSWORD ""
-#define GSM_PIN ""
+#define GSM_PIN "2495"
 
 // DNMS Noise Measurement
 #define DNMS_READ 0
