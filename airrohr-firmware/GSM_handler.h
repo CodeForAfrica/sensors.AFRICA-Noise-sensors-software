@@ -127,6 +127,10 @@ static void unlock_pin(char *PIN)
     // flushSerial();
 
     // Attempt to SET PIN if not empty
+    Serial.print("GSM CONFIG SET PIN: ");
+    Serial.println(PIN);
+    Serial.print("Length of PIN");
+    Serial.println(strlen(PIN));
     if (strlen(PIN) > 1)
     {
         // debug_outln(F("\nAttempting to Unlock SIM please wait: "), DEBUG_MIN_INFO);
@@ -232,5 +236,26 @@ bool GPRS_init()
         Serial.println("Failed to enable GPRS");
         return false;
     }
-    return true;
+    GPRS_CONNECTED = true;
+    return GPRS_CONNECTED;
+}
+
+void GSM_soft_reset()
+{
+
+    fona.enableGPRS(false); // basically shut down GPRS service
+
+    if (!fona.sendCheckReply(F("AT+CFUN=1"), F("OK")))
+    {
+        Serial.println("Soft resetting GSM with full functionality failed!");
+        return;
+    }
+
+    if (!GSM_init(fonaSerial))
+    {
+        Serial.println("GSM not fully configured");
+        Serial.print("Failure point: ");
+        Serial.println(GSM_INIT_ERROR);
+        Serial.println();
+    }
 }
