@@ -251,7 +251,7 @@ namespace cfg
 	unsigned port_custom = PORT_CUSTOM;
 	char user_custom[LEN_USER_CUSTOM] = USER_CUSTOM;
 	char pwd_custom[LEN_CFG_PASSWORD] = PWD_CUSTOM;
-
+	// GSM settings
 	char gsm_pin[LEN_GSM_PIN] = GSM_PIN;
 	char gprs_apn[LEN_GPRS_APN] = GPRS_APN;
 	char gprs_username[LEN_GPRS_USERNAME] = GPRS_USERNAME;
@@ -314,18 +314,6 @@ float last_value_dnms_la_max = -1.0;
 /* GSM declaration                                               *
 /*****************************************************************/
 #if defined(ESP8266)
-// SoftwareSerial fonaSS(FONA_TX, FONA_RX);
-// SoftwareSerial *fonaSerial = &fonaSS;
-// Adafruit_FONA fona = Adafruit_FONA(FONA_RST);
-
-// uint8_t GSM_CONNECTED = 1;
-// uint8_t GPRS_CONNECTED = 1;
-
-// char gsm_pin[5] = "";
-
-// char gprs_apn[100] = "internet";
-// char gprs_username[100] = "";
-// char gprs_password[100] = "";
 
 #include "GSM_handler.h"
 
@@ -530,15 +518,6 @@ static void display_debug(const String &text1, const String &text2)
 		lcd_2004->setCursor(0, 1);
 		lcd_2004->print(text2);
 	}
-}
-
-/*****************************************************************
-/* flushSerial                                                   *
-/*****************************************************************/
-void flushSerial()
-{
-	while (fonaSS.available())
-		fonaSS.read();
 }
 
 /*****************************************************************
@@ -2394,66 +2373,6 @@ static WiFiClient *getNewLoggerWiFiClient(const LoggerEntry logger)
 // 		{
 // 			enableGPRS();
 // 			Serial.println("GPRS ENABLED");
-// 		}
-// 	}
-// }
-
-void enableGPRS()
-{
-	// fona.setGPRSNetworkSettings(FONAFlashStringPtr(gprs_apn), FONAFlashStringPtr(gprs_username), FONAFlashStringPtr(gprs_password));
-
-	int retry_count = 0;
-	while ((fona.GPRSstate() != GPRS_CONNECTED) && (retry_count < 40))
-	{
-		delay(3000);
-		fona.enableGPRS(true);
-		retry_count++;
-	}
-
-	fona.enableGPRS(true);
-}
-
-void disableGPRS()
-{
-	fona.enableGPRS(false);
-	delay(3000);
-}
-
-/***
- * ? Called 3 times. Review the impelementation of this
- * Todo: Change implementation to shut down GSM and then call GSM_init();
- *
- *
- ***/
-void restart_GSM()
-{
-
-	flushSerial();
-
-	fonaSerial->begin(4800);
-	if (!fona.begin(*fonaSerial))
-	{
-		debug_outln(F("Couldn't find FONA"), DEBUG_MIN_INFO);
-		// while (1);
-	}
-
-	unlock_pin(SIM_PIN);
-
-	enableGPRS();
-}
-
-// static void unlock_pin()
-// {
-// 	flushSerial();
-// 	if (strlen(gsm_pin) > 1)
-// 	{
-// 		debug_outln(F("\nAttempting to Unlock SIM please wait: "), DEBUG_MIN_INFO);
-// 		delay(10000);
-// 		if (!fona.unlockSIM(gsm_pin))
-// 		{
-// 			debug_outln(F("Failed to Unlock SIM card with pin: "), DEBUG_MIN_INFO);
-// 			debug_outln(gsm_pin, DEBUG_MIN_INFO);
-// 			delay(10000);
 // 		}
 // 	}
 // }

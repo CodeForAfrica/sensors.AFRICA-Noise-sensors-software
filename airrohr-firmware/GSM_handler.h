@@ -35,8 +35,12 @@ String handle_AT_CMD(String cmd, int _delay = 1000);
 void SIM_PIN_Setup();
 bool is_SIMCID_valid();
 bool GPRS_init();
-// Set a decent delay before this to warm up the GSM module
+void GSM_soft_reset();
+void restart_GSM();
+void enableGPRS();
+void flushSerial();
 
+// Set a decent delay before this to warm up the GSM module
 bool GSM_init(SoftwareSerial *gsm_serial)
 { // Pass a ptr to SoftwareSerial GSM instance
     gsm_serial->begin(4800);
@@ -258,4 +262,53 @@ void GSM_soft_reset()
         Serial.println(GSM_INIT_ERROR);
         Serial.println();
     }
+}
+
+/***
+ * ? Called 3 times. Review the impelementation of this
+ * Todo: Change implementation to shut down GSM and then call GSM_init();
+ *
+ *
+ ***/
+void restart_GSM()
+{
+
+    flushSerial();
+
+    // ToDO: Check if RST pin is physically connected to the board to determine eith a hard or soft reset
+
+    // ! First version of noise PCB has no physical connection to the SIM900 external reset pin
+    // ! Pin 4 of the ESP-12E is thus floating and is only declared to instantiate a FONA class
+    // ** For this reason, a soft rest is more approriate. Fona::begin will literally write to an non-existent pin
+    GSM_soft_reset();
+}
+
+void enableGPRS()
+{
+    // fona.setGPRSNetworkSettings(FONAFlashStringPtr(gprs_apn), FONAFlashStringPtr(gprs_username), FONAFlashStringPtr(gprs_password));
+
+    int retry_count = 0;
+    while ((fona.GPRSstate() != GPRS_CONNECTED) && (retry_count < 40))
+    {
+        delay(3000);
+        fona.enableGPRS(true);
+        retry_count++;
+    }
+
+    fona.enableGPRS(true);
+}
+
+void disableGPRS()
+{
+    fona.enableGPRS(false);
+    delay(3000);
+}
+
+/*****************************************************************
+/* flushSerial                                                   *
+/*****************************************************************/
+void flushSerial()
+{
+    while (fonaSS.available())
+        fonaSS.read();
 }
