@@ -2422,9 +2422,18 @@ static unsigned long sendData(const LoggerEntry logger, const String &data, cons
 	request_head += String(data.length(), DEC) + "\r\n";
 	request_head += F("Connection: close\r\n\r\n");
 
-	if (cfg::gsm_capable)
+	// if (cfg::gsm_capable)
+	if (!GPRS_CONNECTED)
 	{
-		delay(3000);
+		if (SIM_USABLE)
+		{
+			GPRS_init();
+		}
+	}
+
+	if (GPRS_CONNECTED)
+	{
+		// delay(3000); //? Why?
 		int retry_count = 0;
 		uint16_t statuscode;
 		int16_t length;
@@ -2459,11 +2468,11 @@ static unsigned long sendData(const LoggerEntry logger, const String &data, cons
 		debug_out(gprs_data, DEBUG_MIN_INFO);
 		debug_out(F("\n"), DEBUG_MIN_INFO);
 
-		if (fona.GPRSstate() != GPRS_CONNECTED)
-		{
-			debug_out(F("************* Reconnect GPRS *************"), DEBUG_MIN_INFO);
-			enableGPRS();
-		}
+		// if (fona.GPRSstate() != GPRS_CONNECTED)
+		// {
+		// 	debug_out(F("************* Reconnect GPRS *************"), DEBUG_MIN_INFO);
+		// 	enableGPRS();
+		// }
 
 		flushSerial();
 		debug_out(F("## Sending via gsm\n\n"), DEBUG_MIN_INFO);
@@ -2472,8 +2481,9 @@ static unsigned long sendData(const LoggerEntry logger, const String &data, cons
 		{
 			debug_outln_error(F("Failed with status code "));
 			debug_out(String(statuscode), DEBUG_ERROR);
-			restart_GSM();
-			return true;
+			// restart_GSM(); //! I do not see a reason to restart GSM at this point
+			// return true; // ! Wrong retun type. Should send time it takes to send. At this point we are not sending anything
+			return 0;
 		}
 		while (length > 0)
 		{
