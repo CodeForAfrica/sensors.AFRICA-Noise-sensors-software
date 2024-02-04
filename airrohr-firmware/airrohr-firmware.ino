@@ -3428,8 +3428,8 @@ static void setupNetworkTime()
 		if (!sntp_time_set) {
 			time_t now = time(nullptr);
 			debug_outln_info(F("SNTP synced: "), ctime(&now));
-			twoStageOTAUpdate();
-			last_update_attempt = millis();
+			// twoStageOTAUpdate();
+			// last_update_attempt = millis();
 		}
 		sntp_time_set++; });
 #endif
@@ -3546,7 +3546,6 @@ void setup(void)
 	init_config();
 	init_display();
 	init_lcd();
-	setupNetworkTime();
 
 	setup_webserver();
 	debug_outln_info(F("\nChipId: "), esp_chipid);
@@ -3568,6 +3567,8 @@ void setup(void)
 
 		connectWifi();
 	}
+
+	setupNetworkTime();
 
 	powerOnTestSensors();
 	logEnabledAPIs();
