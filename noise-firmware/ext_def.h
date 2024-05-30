@@ -222,3 +222,6 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = " ";
 
 // Set debug level for serial output?
 #define DEBUG 3
+
+// Set VDD power configuration for GSM module. Can be external LIPO or separate power rail
+#define SEPARATE_GSM_PWR 1
