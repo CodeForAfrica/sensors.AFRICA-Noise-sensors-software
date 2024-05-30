@@ -1,3 +1,6 @@
+#ifndef EXT_DEF_H
+#define EXT_DEF_H
+
 // Language config
 #define CURRENT_LANG INTL_LANG
 
@@ -225,3 +228,5 @@ static const char MEASUREMENT_NAME_INFLUX[] PROGMEM = " ";
 
 // Set VDD power configuration for GSM module. Can be external LIPO or separate power rail
 #define SEPARATE_GSM_PWR 1
+
+#endif

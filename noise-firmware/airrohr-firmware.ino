@@ -519,15 +519,6 @@ static void display_debug(const String &text1, const String &text2)
 }
 
 /*****************************************************************
-/* flushSerial                                                   *
-/*****************************************************************/
-void flushSerial()
-{
-	while (fonaSS.available())
-		fonaSS.read();
-}
-
-/*****************************************************************
  * check display values, return '-' if undefined                 *
  *****************************************************************/
 static String check_display_value(double value, double undef, uint8_t len, uint8_t str_len)
